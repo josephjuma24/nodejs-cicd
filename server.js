@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
     message: 'Hello, World!'
   })
 })
-
+// Middleware to parse JSON bodies
 app.listen(8080, () => {
   console.log('Server is running on port 8080')
 })
