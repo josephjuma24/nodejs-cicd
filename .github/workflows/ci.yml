@@ -19,6 +19,6 @@ jobs:
       run: echo docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD --password-stdin
       
     - name: Build the Docker image
-      run: docker build -t josephjuma24/nodejs-cicd .
+      run: docker build -t nodejs-cicd .
     - name: Push to Dockerhub
-      run: docker push josephjuma24/nodejs-cicd
+      run: docker push jjuma/nodejs-cicd
