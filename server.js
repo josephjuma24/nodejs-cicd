@@ -1,3 +1,4 @@
+// Description: A simple Node.js server using Express.js
 const express = require('express')
 
 const app = express()
