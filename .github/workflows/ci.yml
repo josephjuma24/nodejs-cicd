@@ -1,3 +1,5 @@
+# This workflow builds a Docker image and pushes it to Docker Hub on every push to the main branch.
+
 name: Docker Image CI
 
 on:
@@ -5,20 +7,31 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  build:
-
+  build_and_push:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Login Dockerhub
-      env:
-        DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: echo docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD --password-stdin
-      
-    - name: Build the Docker image
-      run: docker build -t nodejs-cicd .
-    - name: Push to Dockerhub
-      run: docker push jjuma/nodejs-cicd
+      # Step 1: Check out the repository code so the workflow can access it.
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # Step 2: Log in to Docker Hub using secrets for credentials.
+      # This uses the official Docker action which is secure and reliable.
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+
+      # Step 3: Build the Docker image and push it to Docker Hub.
+      # This action combines the 'docker build' and 'docker push' steps.
+      # It automatically tags the image with your Docker Hub username and the repo name.
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Tags the image with 'latest' and also with the Git commit SHA for versioning.
+          # Example: jjuma/nodejs-cicd:latest, jjuma/nodejs-cicd:a1b2c3d
+          tags: ${{secrets.DOCKER_USERNAME}}/nodejs-cicd:latest,${{secrets.DOCKER_USERNAME}}/nodejs-cicd:${{ github.sha}}
