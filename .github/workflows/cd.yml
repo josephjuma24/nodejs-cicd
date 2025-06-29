@@ -1,0 +1,30 @@
+# This workflow deploys the Docker image to a self-hosted runner.
+# It triggers only after the "CI Pipeline" workflow has completed successfully.
+
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"] # The name of the workflow that must complete first
+    types:
+      - completed
+
+jobs:
+  # This job will only run if the triggering workflow ("CI Pipeline") was successful.
+  deploy:
+    runs-on: self-hosted
+    if: github.event.workflow_run.conclusion == 'success' # Ensures CI passed
+
+    steps:
+      # Step 1: Pull the latest version of the image from the registry.
+      - name: Pull Docker image from Docker Hub
+        run: sudo docker pull jjuma/nodejs-cicd:latest
+
+      # Step 2: Stop and remove the old container if it exists.
+      # The '|| true' part prevents the step from failing if the container isn't running.
+      - name: Stop and delete old Docker container
+        run: sudo docker rm -f nodejs-cicd-container || true
+
+      # Step 3: Run a new container from the updated image.
+      - name: Run new Docker container
+        run: sudo docker run -d -p 8080:8080 --name nodejs-cicd-container jjuma/nodejs-cicd:latest
